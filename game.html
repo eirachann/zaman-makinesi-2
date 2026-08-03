@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zaman Makinesi - Oyun</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(ellipse at top, #3d2a4a 0%, #2a1f3d 35%, #1a1424 75%, #120d1a 100%);
+            color: #f3ede7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 15px;
+            overflow-x: hidden;
+        }
+
+        .game-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            min-height: 85vh;
+            margin-top: 10px;
+        }
+
+        .sidebar {
+            background: rgba(255, 240, 225, 0.045);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 220, 200, 0.12);
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar h3 {
+            font-size: 1.1rem;
+            color: #a78bfa;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .oyuncu-karti {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 6px;
+        }
+
+        .kategori-baslik {
+            font-size: 0.85rem;
+            color: #a78bfa;
+            font-weight: 600;
+            margin-top: 6px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .player-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .group-title {
+            font-size: 0.85rem;
+            color: #a78bfa;
+            font-weight: 600;
+            padding-bottom: 3px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .player-card {
+            background: rgba(255, 240, 225, 0.04);
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            border: 1px solid rgba(255, 220, 200, 0.06);
+        }
+
+        .player-card.is-me {
+            border-color: rgba(196, 181, 253, 0.5);
+            background: rgba(167, 139, 250, 0.1);
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .status-waiting {
+            background: rgba(234, 179, 8, 0.2);
+            color: #fde047;
+        }
+
+        .status-spectator {
+            background: rgba(148, 163, 184, 0.2);
+            color: #cbd5e1;
+        }
+
+        .kick-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            border-radius: 6px;
+            background: rgba(220, 38, 38, 0.25);
+            border: 1px solid rgba(220, 38, 38, 0.5);
+            color: #fca5a5;
+        }
+
+        .kick-btn:hover {
+            background: rgba(220, 38, 38, 0.4);
+        }
+
+        .main-content {
+            background: rgba(255, 240, 225, 0.045);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 220, 200, 0.12);
+            border-radius: 18px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 10px;
+        }
+
+        .header-info h1 { 
+            font-size: 1.4rem; 
+            color: #f3f4f6; 
+            white-space: nowrap; 
+        }
+        
+        .header-sag {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .room-details { 
+            font-size: 0.85rem; 
+            color: #a78bfa; 
+        }
+
+        .tur-bilgisi {
+            font-size: 0.95rem;
+            color: #a78bfa;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .rol-karti {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #f3f4f6;
+        }
+
+        .bilgi-karti {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        .bilgi-karti h2 {
+            margin-bottom: 6px;
+            color: #d8b4fe;
+            text-align: center;
+        }
+
+        .bilgi-karti h3 {
+            font-size: 0.85rem;
+            color: #c4b5fd;
+            margin-bottom: 8px;
+        }
+
+        .bilgi-karti ul {
+            padding-left: 20px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .kartBolum {
+            margin-top: 16px;
+        }
+
+        .etiketler,
+        .yasakKutusu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .etiket {
+            background: #4f46e5;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+        }
+
+        .yasakEtiket {
+            background: #dc2626;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+        }
+
+        .bilgilendirme {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .host-panel {
+            background: rgba(255, 240, 225, 0.03);
+            border: 1px solid rgba(255, 220, 200, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 10px;
+        }
+
+        .host-panel label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 0.85rem;
+        }
+
+        .hostButonlar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button.ikincil {
+            background: transparent;
+            border: 1px solid #8b5cf6;
+            color: #d8b4fe;
+        }
+
+        button.ikincil:hover {
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .oyuncu-secim-listesi {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .oyuncu-sec-btn {
+            background: #312e81;
+        }
+
+        .oyuncu-sec-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 6, 15, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #241a30;
+            border: 1px solid rgba(255, 220, 200, 0.12);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
+            color: #d8b4fe;
+        }
+
+        .modal-close {
+            width: auto;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .modal-body {
+            padding: 18px 20px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #a78bfa;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(20, 10, 35, 0.9);
+            color: #fff;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .gecmis-item {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        select {
+            background: rgba(20, 10, 35, 0.9);
+            color: #ffffff;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            width: 100%;
+            max-width: 300px;
+            margin: 10px 0;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        .sayac {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        #sayacYazi {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f3f4f6;
+            font-family: monospace;
+        }
+
+        .sonucKutusu {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        button, .main-content button {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 768px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                max-height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-layout">
+        <div class="sidebar">
+            <h3>👥 Katılımcılar</h3>
+            <div id="oyuncuListesiPanel"></div>
+        </div>
+
+        <div class="main-content">
+            <div class="header-info">
+                <h1>🕰️ Zaman Makinesi</h1>
+                <div class="header-sag">
+                    <div class="room-details">
+                        Oda: <strong id="odaKodu">-</strong> | Mod: <strong id="modAdi">-</strong>
+                    </div>
+                    <div id="genelButonlar" style="display:flex; gap:8px;"></div>
+                    <div id="hostLobiBtnContainer"></div>
+                </div>
+            </div>
+
+            <div id="icerik">
+                <p>Oyun verisi yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+</body>
+</html>
