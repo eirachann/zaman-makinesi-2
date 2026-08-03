@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Zaman Makinesi</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="kutu">
+
+    <h1>⏳ Zaman Makinesi</h1>
+
+    <p class="aciklama">
+        Tarihin ve Evrenlerin Arasında Yolculuğa Hazır mısın?
+    </p>
+
+    <input
+        id="isim"
+        type="text"
+        placeholder="İsmini Gir"
+        maxlength="20"
+        autocomplete="off"
+    >
+
+    <button id="olustur">
+        👑 Oda Oluştur
+    </button>
+
+    <button id="katil">
+        🚪 Odaya Katıl
+    </button>
+
+    <p class="versiyon">
+        v0.1 Alpha
+    </p>
+
+    <div id="popup" class="popup-gizli">
+
+        <div class="popup">
+
+            <h2>🚪 Odaya Katıl</h2>
+
+            <input
+                id="odaKod"
+                type="text"
+                maxlength="5"
+                placeholder="Oda Kodunu Gir"
+                autocomplete="off"
+            >
+
+            <button id="katilBtn">
+                Katıl
+            </button>
+
+            <button id="kapat">
+                İptal
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script type="module" src="script.js"></script>
+
+</body>
+
+</html>
